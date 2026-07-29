@@ -95,6 +95,20 @@
 
   .hint{ font-size:7px; color:#3d5a3d; text-align:center; max-width:480px; }
 
+  .hidden{ display:none !important; }
+
+  .fullscreen-overlay{
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(0,0,0,.8);
+    display:flex; align-items:center; justify-content:center;
+    padding:16px;
+  }
+  .ad-break-box{
+    background:var(--panel); border:2px solid var(--neon-dim); border-radius:10px;
+    padding:16px; max-width:320px; width:100%; text-align:center;
+  }
+  .ad-break-label{ font-size:9px; color:var(--lcd-bg); margin:0 0 10px; }
+
   @media (min-height:700px){
     #boardWrap{ max-width:420px; }
   }
@@ -102,31 +116,6 @@
 </head>
 <body>
 <div id="app">
-  <!--
-  ===================== MONETIZAÇÃO =====================
-  Rede: Adsterra (banner 300x250, sem anúncios para adultos).
-  Mesma zone/key usada no jogo da velha (Jogo-Da-Velha10).
-  Zone/key: db4d2cba33bf7f393f5846a727270561 — gerenciar em
-  https://beta.publishers.adsterra.com/websites
-  Se notar redirecionamento forçado ou domínio suspeito abrindo
-  sozinho, comentar este bloco imediatamente.
-  =========================================================
-  -->
-  <div id="ad-wrapper" style="width:100%; max-width:480px; min-height:250px; display:flex; align-items:center; justify-content:center; background:#12241a; border:2px solid #1f8f3f; border-radius:8px; overflow:hidden; margin-bottom:4px;">
-    <div id="ad-container">
-      <script>
-        atOptions = {
-          'key' : 'db4d2cba33bf7f393f5846a727270561',
-          'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
-          'params' : {}
-        };
-      </script>
-      <script src="https://www.highperformanceformat.com/db4d2cba33bf7f393f5846a727270561/invoke.js"></script>
-    </div>
-  </div>
-
   <div id="topbar">
     <div class="stat">SCORE <span id="scoreVal">0</span></div>
     <div class="stat">RECORDE <span id="highVal">0</span></div>
@@ -174,6 +163,54 @@
   </div>
 
   <div class="hint">Dica: arraste o dedo sobre o tabuleiro pra virar a cobrinha</div>
+
+  <!--
+  ===================== MONETIZAÇÃO =====================
+  Rede: Adsterra (banner 300x250, sem anúncios para adultos).
+  Mesma zone/key usada no jogo da velha (Jogo-Da-Velha10).
+  Zone/key: db4d2cba33bf7f393f5846a727270561 — gerenciar em
+  https://beta.publishers.adsterra.com/websites
+  Posicionado ABAIXO do jogo (não acima) e no tamanho nativo do
+  anúncio (300px) pra não ficar maior que o tabuleiro no celular.
+  Se notar redirecionamento forçado ou domínio suspeito abrindo
+  sozinho, comentar este bloco imediatamente.
+  =========================================================
+  -->
+  <div id="ad-wrapper" style="width:100%; max-width:300px; min-height:250px; display:flex; align-items:center; justify-content:center; background:#12241a; border:2px solid #1f8f3f; border-radius:8px; overflow:hidden; margin:4px auto 0;">
+    <div id="ad-container">
+      <script>
+        atOptions = {
+          'key' : 'db4d2cba33bf7f393f5846a727270561',
+          'format' : 'iframe',
+          'height' : 250,
+          'width' : 300,
+          'params' : {}
+        };
+      </script>
+      <script src="https://www.highperformanceformat.com/db4d2cba33bf7f393f5846a727270561/invoke.js"></script>
+    </div>
+  </div>
+</div>
+
+<!-- Anúncio intersticial: aparece centralizado a cada 3 partidas, igual ao padrão do jogo da velha.
+     Reaproveita a mesma ad unit (300x250). Some ao clicar em continuar. -->
+<div id="adBreakOverlay" class="fullscreen-overlay hidden">
+  <div class="ad-break-box">
+    <p class="ad-break-label">ANÚNCIO</p>
+    <div id="ad-container-break" style="min-height:250px; display:flex; align-items:center; justify-content:center; background:#0a140a; border-radius:6px; margin-bottom:12px; overflow:hidden;">
+      <script>
+        atOptions = {
+          'key' : 'db4d2cba33bf7f393f5846a727270561',
+          'format' : 'iframe',
+          'height' : 250,
+          'width' : 300,
+          'params' : {}
+        };
+      </script>
+      <script src="https://www.highperformanceformat.com/db4d2cba33bf7f393f5846a727270561/invoke.js"></script>
+    </div>
+    <button class="btn" id="closeAdBreakBtn">CONTINUAR JOGANDO</button>
+  </div>
 </div>
 
 <script>
@@ -200,6 +237,14 @@
   const HIGH_KEY = 'snake_retro_high_score';
   let highScore = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10);
   highVal.textContent = highScore;
+
+  // ---------- Ad break (interstitial a cada 3 partidas, igual ao jogo da velha) ----------
+  const GAMES_KEY = 'snake_games_finished';
+  let gamesFinished = parseInt(localStorage.getItem(GAMES_KEY) || '0', 10);
+  const adBreakOverlay = document.getElementById('adBreakOverlay');
+  document.getElementById('closeAdBreakBtn').addEventListener('pointerdown', () => {
+    adBreakOverlay.classList.add('hidden');
+  });
 
   let soundOn = true;
 
@@ -410,6 +455,12 @@
     sfx.die();
     if(navigator.vibrate) navigator.vibrate(120);
     updateHud();
+
+    gamesFinished++;
+    localStorage.setItem(GAMES_KEY, String(gamesFinished));
+    if(gamesFinished % 3 === 0){
+      adBreakOverlay.classList.remove('hidden');
+    }
   }
 
   function step(){
