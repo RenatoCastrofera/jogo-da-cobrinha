@@ -102,6 +102,31 @@
 </head>
 <body>
 <div id="app">
+  <!--
+  ===================== MONETIZAÇÃO =====================
+  Rede: Adsterra (banner 300x250, sem anúncios para adultos).
+  Mesma zone/key usada no jogo da velha (Jogo-Da-Velha10).
+  Zone/key: db4d2cba33bf7f393f5846a727270561 — gerenciar em
+  https://beta.publishers.adsterra.com/websites
+  Se notar redirecionamento forçado ou domínio suspeito abrindo
+  sozinho, comentar este bloco imediatamente.
+  =========================================================
+  -->
+  <div id="ad-wrapper" style="width:100%; max-width:480px; min-height:250px; display:flex; align-items:center; justify-content:center; background:#12241a; border:2px solid #1f8f3f; border-radius:8px; overflow:hidden; margin-bottom:4px;">
+    <div id="ad-container">
+      <script>
+        atOptions = {
+          'key' : 'db4d2cba33bf7f393f5846a727270561',
+          'format' : 'iframe',
+          'height' : 250,
+          'width' : 300,
+          'params' : {}
+        };
+      </script>
+      <script src="https://www.highperformanceformat.com/db4d2cba33bf7f393f5846a727270561/invoke.js"></script>
+    </div>
+  </div>
+
   <div id="topbar">
     <div class="stat">SCORE <span id="scoreVal">0</span></div>
     <div class="stat">RECORDE <span id="highVal">0</span></div>
